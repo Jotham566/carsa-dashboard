@@ -1,6 +1,14 @@
 # Component Library & Design System
 
-## Version 1.0.0 | January 2025
+## Version 2.0.0 | January 2025
+
+## 🏢 Platform Architecture
+
+This design system serves both applications in the CARSA Lens platform:
+- **Public Job Board (/)** - Job seeker-facing interface
+- **Organization Portal (/portal)** - Admin/recruiter interface
+
+Components are designed for maximum reusability across both contexts with appropriate theming and responsive behavior.
 
 ## 🎨 Design Tokens
 

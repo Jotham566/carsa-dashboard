@@ -1,15 +1,17 @@
-# CARSA Lens Frontend - Product Specification
+# CARSA Lens Platform - Product Specification
 
-## Version 1.0.0 | January 2025
+## Version 2.0.0 | January 2025
 
 ## 📋 Executive Summary
 
-CARSA Lens is an AI-powered recruitment platform designed for B2B clients (corporates & NGOs) in Uganda and East Africa. The frontend provides an intuitive, enterprise-grade interface for HR teams to manage the entire hiring lifecycle—from job posting to candidate evaluation and analytics.
+CARSA Lens is a **comprehensive AI-powered recruitment platform** that serves both B2B organizations and job seekers in Uganda and East Africa. The platform combines enterprise-grade recruitment tools with a public job board, multi-channel posting, and frictionless application experience.
 
 ### Key Value Propositions
+- **10x Reach** through automated multi-channel job posting
 - **95% Time Reduction** in CV screening through AI automation
+- **3x Applications** via frictionless public application process
 - **Evidence-Based Hiring** with detailed evaluation justifications
-- **Bias-Free Recruitment** with advanced pattern detection
+- **Complete Pipeline** from job posting to hire analytics
 - **Enterprise Security** with multi-tenant isolation
 
 ---
@@ -78,6 +80,46 @@ CARSA Lens is an AI-powered recruitment platform designed for B2B clients (corpo
 - **Responsibilities:** Strategic oversight, budget approval
 - **Needs:** High-level analytics, ROI metrics, compliance reports
 
+### Job Seeker Personas
+
+#### 6. **Active Job Seeker (Alice)**
+- **Age:** 22-45
+- **Context:** Actively searching for opportunities in Uganda/East Africa
+- **Tech Savvy:** Variable (mobile-first)
+- **Pain Points:**
+  - Complex application processes requiring accounts
+  - Unclear job requirements and expectations
+  - No feedback after applying to jobs
+  - Limited access to quality opportunities
+- **Goals:**
+  - Find relevant jobs quickly
+  - Apply with minimal friction
+  - Get fair, AI-powered evaluation
+  - Track application status
+
+#### 7. **Passive Candidate (Brian)**
+- **Age:** 25-40
+- **Context:** Currently employed but open to better opportunities
+- **Tech Savvy:** High
+- **Pain Points:**
+  - Time-consuming application processes
+  - Privacy concerns about job searching
+  - Irrelevant job recommendations
+- **Goals:**
+  - Quick application process (< 2 minutes)
+  - Confidential applications
+  - Quality opportunities only
+  - Professional growth focus
+
+#### 8. **Social Referrer (Carol)**
+- **Age:** Any
+- **Context:** Shares job opportunities with network
+- **Motivation:** Help connections find opportunities
+- **Goals:**
+  - Easy sharing mechanisms
+  - Track referral success
+  - Social recognition for helping
+
 ---
 
 ## 🎯 User Journeys
@@ -89,13 +131,16 @@ CARSA Lens is an AI-powered recruitment platform designed for B2B clients (corpo
 4. **Subscription** → Select plan (Freemium start)
 5. **Onboarding** → Guided tour of key features
 
-### Journey 2: Creating & Publishing a Job
+### Journey 2: Creating & Multi-Channel Publishing
 1. **Job Creation** → HR Manager creates new job posting
 2. **JD Upload/Generation** → Upload existing or AI-generate JD
 3. **Bias Check** → System analyzes for unconscious bias
 4. **Scorecard Generation** → AI creates evaluation criteria
 5. **Team Assignment** → Assign recruiters/hiring managers
-6. **Publishing** → Activate job for candidate processing
+6. **Channel Selection** → Choose external job boards (True North, etc.)
+7. **Auto-Publishing** → Posts to CARSA board + selected channels
+8. **Share Link Generation** → Create trackable social sharing links
+9. **Performance Monitoring** → Track views, applications across channels
 
 ### Journey 3: Processing Candidates
 1. **CV Upload** → Bulk upload or individual submission
@@ -111,6 +156,24 @@ CARSA Lens is an AI-powered recruitment platform designed for B2B clients (corpo
 3. **Discussion** → Team collaboration on candidates
 4. **Decision** → Final selection made
 5. **Notification** → Status updates to all parties
+
+### Journey 5: Job Discovery & Application (Job Seeker)
+1. **Discovery** → Find job via search, browse, or shared link
+2. **Job Review** → Read details, requirements, company info
+3. **Quick Apply** → Enter email + upload CV (no account needed)
+4. **Email Verification** → One-click verification link
+5. **Auto-Processing** → AI screening triggers automatically
+6. **Confirmation** → Email confirmation with next steps
+7. **Status Updates** → Notifications about screening progress
+
+### Journey 6: Social Job Sharing
+1. **Job Discovery** → Find interesting opportunity
+2. **Share Decision** → Click share button
+3. **Channel Selection** → Choose WhatsApp, LinkedIn, etc.
+4. **Link Generation** → System creates trackable share link
+5. **Distribution** → Share with network
+6. **Attribution Tracking** → Track clicks and applications
+7. **Recognition** → Credit for successful referrals
 
 ---
 
@@ -158,10 +221,11 @@ CARSA Lens is an AI-powered recruitment platform designed for B2B clients (corpo
 - **Audit logging:** All data access tracked
 
 ### Access Control
-- **Role-based permissions:** Admin, Manager, Recruiter, Viewer
-- **Organization boundaries:** Complete data isolation
-- **IP whitelisting:** (Enterprise feature)
+- **Simplified RBAC:** Organization Admin + Team Member (two roles only)
+- **Organization boundaries:** Complete data isolation between organizations
+- **Team Member access:** Full recruitment functionality, limited settings access
 - **Session management:** Concurrent session limits
+- **IP whitelisting:** (Enterprise feature)
 
 ---
 
@@ -203,7 +267,7 @@ CARSA Lens is an AI-powered recruitment platform designed for B2B clients (corpo
 
 ---
 
-## 🚀 MVP Scope (Phase 1)
+## 🚀 MVP Scope (Phase 1 - Enhanced)
 
 ### Core Features
 1. **Authentication System**
@@ -216,20 +280,33 @@ CARSA Lens is an AI-powered recruitment platform designed for B2B clients (corpo
    - Team member invites
    - Basic role management
 
-3. **Job Management**
+3. **Job Management & Publishing**
    - Create/edit/delete jobs
    - JD upload & AI processing
    - Scorecard generation
+   - Auto-publish to CARSA Job Board
+   - Multi-channel posting setup
+   - Share link generation
 
-4. **Candidate Processing**
+4. **Public Job Board**
+   - Public job listings (searchable/filterable)
+   - Job detail pages with apply button
+   - Frictionless application flow (email + CV)
+   - Email verification system
+   - Mobile-optimized experience
+
+5. **Candidate Processing**
    - CV upload (single & bulk)
+   - Public application processing
    - AI extraction & evaluation
    - Ranking & filtering
 
-5. **Basic Analytics**
-   - Job statistics
-   - Processing metrics
-   - Simple reports
+6. **Enhanced Analytics**
+   - Job posting performance
+   - Application funnel metrics
+   - Source attribution
+   - Share link tracking
+   - Cross-channel insights
 
 ### Out of Scope (Future Phases)
 - Interview scheduling & tracking
@@ -242,11 +319,29 @@ CARSA Lens is an AI-powered recruitment platform designed for B2B clients (corpo
 - Mobile applications
 - Advanced customization
 
+### Backend API Status (MVP)
+**Note:** While the backend database supports interview and hire tracking fields, the API endpoints for these features haven't been implemented yet. Frontend should focus on available functionality:
+
+**✅ Available APIs (Ready for Frontend):**
+- Complete job management workflow
+- CV processing & AI evaluation 
+- Candidate ranking & shortlisting
+- Basic analytics & reporting
+- Public job board endpoints
+- Multi-channel posting setup
+
+**❌ Not Yet Available (Backend TODO):**
+- Interview status updates (`PUT /candidates/:id/status`)
+- Offer management endpoints
+- Enhanced notification system
+- Full funnel analytics with interview/hire stages
+
 ---
 
 ## 📈 Growth Path
 
-### Phase 2 (Q2 2025)
+### Phase 2 (Q2 2025) 
+- Backend API completion (interview/hire tracking endpoints)
 - Enhanced analytics & reporting
 - Email notifications
 - Advanced filtering
@@ -265,3 +360,51 @@ CARSA Lens is an AI-powered recruitment platform designed for B2B clients (corpo
 - Onboarding features
 - Advanced AI models
 - Regional expansion features
+
+---
+
+## 🔍 Backend Analysis Summary
+
+### API Readiness Status: ✅ **Production-Ready Foundation**
+
+**Current Backend Capabilities:**
+- **54+ Endpoints** covering recruitment workflow
+- **OpenAPI 3.0** specification available
+- **95% CV extraction accuracy** with Docling
+- **Multi-tenant architecture** with PostgreSQL RLS
+- **AI integration** with automatic provider failover
+- **Comprehensive error handling** and structured responses
+
+**Key API Groups:**
+1. **Authentication** (8 endpoints) - Complete auth flow
+2. **Jobs** (12 endpoints) - Full CRUD + JD processing
+3. **Candidates** (10 endpoints) - Upload, extraction, management
+4. **Evaluations** (8 endpoints) - AI scoring and comparison
+5. **Analytics** (6 endpoints) - Basic metrics (needs expansion)
+6. **Organization/Team** (10 endpoints) - Multi-tenant management
+
+**Tech Stack Strengths:**
+- FastAPI 0.110.0 with async/await patterns
+- SQLAlchemy 2.0.25 with modern async support
+- Evidence-based AI evaluation with detailed justifications
+- Comprehensive bias detection in job descriptions
+- JWT auth with security headers implemented
+
+### Recommended Frontend Stack:
+- **Next.js 14.1+** (App Router)
+- **TypeScript 5.3+** (Strict mode) 
+- **Tailwind CSS 3.4+**
+- **Radix UI** for accessible components
+- **React Query 5+** for data fetching
+- **Zod** for runtime validation
+
+### Quick Start Environment Setup:
+```bash
+# .env.local
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# .env.production  
+NEXT_PUBLIC_API_URL=https://ca-carsa-lens-dev.kindplant-1a06368c.centralus.azurecontainerapps.io/api/v1
+NEXT_PUBLIC_APP_URL=https://carsa-lens.com
+```

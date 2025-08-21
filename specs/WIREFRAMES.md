@@ -1,10 +1,15 @@
 # CARSA Lens - Wireframe Specifications
 
-## Version 1.0.0 | January 2025
+## Version 2.0.0 | January 2025
 
 ## 📐 Overview
 
-This document provides detailed wireframe specifications for all MVP screens. Each wireframe includes layout, components, interactions, and API connections.
+This document provides detailed wireframe specifications for the **Organization Portal (/portal)** - the authenticated admin interface for recruitment management. The platform also includes a **public job board** with separate wireframes detailed in `@specs/JOB_BOARD_WIREFRAMES.md`.
+
+### Architecture Overview
+- **Public Job Board (/)** - Job seekers discover and apply to opportunities
+- **Organization Portal (/portal)** - Organizations manage recruitment workflow (THIS DOCUMENT)
+- **Shared API** - Unified backend serving both applications
 
 ---
 
@@ -162,28 +167,29 @@ This document provides detailed wireframe specifications for all MVP screens. Ea
 │  ┌─────────────────────────────┬──────────────────────────────┐    │
 │  │ Recent Activity             │ Quick Actions               │    │
 │  ├─────────────────────────────┼──────────────────────────────┤    │
-│  │ • New CV: John Doe          │ [+ Create Job]              │    │
-│  │   Software Engineer - 2min  │                             │    │
+│  │ • Public Application        │ [+ Create Job]              │    │
+│  │   John Doe via Job Board    │                             │    │
 │  │                              │ [📤 Upload CVs]             │    │
-│  │ • Evaluation Complete        │                             │    │
-│  │   Sarah Smith - 85% match   │ [📊 View Reports]           │    │
+│  │ • Posted to 3 Channels      │                             │    │
+│  │   Software Engineer - 5min  │ [📊 View Analytics]         │    │
 │  │                              │                             │    │
-│  │ • Job Published              │ [👥 Invite Team]            │    │
-│  │   Senior Developer - 1hr    │                             │    │
+│  │ • Share Link: 25 clicks     │ [👥 Invite Team]            │    │
+│  │   Senior Developer - 2hr    │                             │    │
 │  │                              │                             │    │
 │  │ [View All Activity →]        │                             │    │
 │  └─────────────────────────────┴──────────────────────────────┘    │
 │                                                                      │
 │  ┌────────────────────────────────────────────────────────────┐    │
-│  │ Hiring Funnel - Last 30 Days                              │    │
+│  │ Application Funnel - Last 30 Days                         │    │
 │  ├────────────────────────────────────────────────────────────┤    │
 │  │                                                            │    │
-│  │  CVs Uploaded:  ████████████████████ 342                 │    │
-│  │  Processed:     ████████████ 234                         │    │
-│  │  Evaluated:     ████████ 156                             │    │
-│  │  Shortlisted:   ████ 67                                  │    │
+│  │  Job Views:     ████████████████████████ 8,542           │    │
+│  │  Applications:  ████████████████ 1,234 (all sources)     │    │
+│  │  Processed:     ████████████ 856                         │    │
+│  │  Evaluated:     ████████ 645                             │    │
+│  │  Shortlisted:   ███ 123                                  │    │
 │  │                                                           │    │
-│  │  * Interview & Hire tracking coming in Phase 2           │    │
+│  │  * Includes public job board & multi-channel metrics     │    │
 │  │                                                            │    │
 │  └────────────────────────────────────────────────────────────┘    │
 │                                                                      │

@@ -1,10 +1,15 @@
 # API to UI Mapping
 
-## Version 1.0.0 | January 2025
+## Version 2.0.0 | January 2025
 
 ## 📋 Overview
 
-This document maps each UI screen/component to its corresponding API endpoints, including request/response schemas, error handling, and state management requirements.
+This document maps each UI screen/component to its corresponding API endpoints for both the **public job board** and **organization portal**, including request/response schemas, error handling, and state management requirements.
+
+### Platform Coverage:
+- **Public Job Board (/)** - Unauthenticated job seeker interface
+- **Organization Portal (/portal)** - Authenticated admin/recruiter interface
+- **Shared APIs** - Backend services used by both applications
 
 ---
 
@@ -339,9 +344,233 @@ interface ErrorResponse {
 | Action | Invalidates | Strategy |
 |--------|-------------|----------|
 | Create Job | Jobs list | Optimistic update |
+| Publish Job | Job board cache | Clear cache |
 | Upload CV | Candidates list | Refetch |
 | Complete Evaluation | Multiple | Targeted refetch |
 | Update Settings | User data | Immediate |
+
+---
+
+## 🌐 Public Job Board APIs
+
+### Job Board Homepage
+
+| Component | Method | Endpoint | Parameters | Response | Cache |
+|-----------|--------|----------|------------|----------|--------|
+| Featured Jobs | GET | `/public/jobs/featured` | `?limit=6` | `{jobs[]}` | 10 min |
+| Recent Jobs | GET | `/public/jobs/recent` | `?limit=10` | `{jobs[]}` | 5 min |
+| Job Categories | GET | `/public/categories` | - | `{categories[]}` | 1 hour |
+| Job Locations | GET | `/public/locations` | - | `{locations[]}` | 1 hour |
+| Popular Companies | GET | `/public/companies/popular` | `?limit=10` | `{companies[]}` | 30 min |
+
+### Job Search & Listings
+
+| Action | Method | Endpoint | Parameters | Response | Features |
+|--------|--------|----------|------------|----------|----------|
+| Search Jobs | GET | `/public/jobs/search` | `?q={}&location={}&category={}` | `{jobs[], total, filters}` | Full-text search |
+| Filter Jobs | GET | `/public/jobs` | `?category={}&salary_min={}&job_type={}` | `{jobs[], facets}` | Advanced filtering |
+| Browse by Category | GET | `/public/jobs/category/:slug` | `?page=1&limit=20` | `{jobs[], category_info}` | SEO-friendly |
+| Browse by Location | GET | `/public/jobs/location/:slug` | `?page=1&limit=20` | `{jobs[], location_info}` | Geo-targeting |
+
+### Job Detail & Application
+
+| Action | Method | Endpoint | Request | Response | Processing |
+|--------|--------|----------|---------|----------|------------|
+| Get Job Details | GET | `/public/jobs/:id` | - | `{job, company, similar_jobs}` | Public access |
+| Submit Application | POST | `/public/jobs/:id/apply` | `{email, phone?, cv_file}` | `{application_id, status}` | Email verification |
+| Verify Application | GET | `/public/verify/:token` | - | `{success, application_details}` | One-click verify |
+| Track Application | GET | `/public/applications/:id/status` | - | `{status, timeline, evaluation?}` | Public tracking |
+
+**Application Flow:**
+```typescript
+interface ApplicationRequest {
+  email: string;
+  phone?: string;
+  cv_file: File;
+  source?: 'direct' | 'share_link';
+  share_link_id?: string;
+  utm_params?: Record<string, string>;
+}
+
+interface ApplicationResponse {
+  application_id: string;
+  status: 'pending_verification' | 'verified' | 'processing' | 'completed';
+  message: string;
+  verification_sent: boolean;
+  next_steps: string[];
+}
+```
+
+### Social Sharing
+
+| Action | Method | Endpoint | Request | Response | Tracking |
+|--------|--------|----------|---------|----------|----------|
+| Generate Share Link | POST | `/public/jobs/:id/share` | `{channel, referrer_id?}` | `{share_url, tracking_id}` | UTM tracking |
+| Track Share Click | GET | `/public/share/:share_id` | - | Redirect to job | Analytics event |
+| Get Share Stats | GET | `/api/v1/jobs/:id/share-stats` | - | `{shares, clicks, applications}` | Auth required |
+
+---
+
+## 🚀 Job Posting & Multi-Channel APIs
+
+### Job Creation with Publishing
+
+| Step | Method | Endpoint | Request | Response | Auto-Actions |
+|------|--------|----------|---------|----------|--------------|
+| Create Job | POST | `/api/v1/jobs` | `{job_details, publish_config}` | `{job, posting_preview}` | None |
+| Preview Posting | GET | `/api/v1/jobs/:id/posting-preview` | `?channels=internal,true_north` | `{previews[]}` | Format validation |
+| Publish Job | POST | `/api/v1/jobs/:id/publish` | `{channels[], schedule?}` | `{posting_results[]}` | Multi-channel post |
+| Update Posting | PUT | `/api/v1/jobs/:id/postings/:channel` | `{updates}` | `{posting_status}` | Channel-specific |
+
+**Publishing Configuration:**
+```typescript
+interface PublishConfig {
+  channels: Array<{
+    channel_id: 'internal' | 'true_north' | 'linkedin' | string;
+    enabled: boolean;
+    config?: {
+      featured?: boolean;
+      boost_budget?: number;
+      target_audience?: string[];
+    };
+  }>;
+  auto_publish_internal: boolean; // Always true
+  schedule?: {
+    publish_at: DateTime;
+    expire_at?: DateTime;
+  };
+  share_settings: {
+    generate_links: boolean;
+    social_media_ready: boolean;
+  };
+}
+```
+
+### Posting Status & Management
+
+| Component | Method | Endpoint | Response | Real-time |
+|-----------|--------|----------|----------|-----------|
+| Posting Status | GET | `/api/v1/jobs/:id/postings` | `{postings[], analytics}` | Poll 30s |
+| Channel Status | GET | `/api/v1/jobs/:id/postings/:channel` | `{status, metrics, errors?}` | - |
+| Retry Failed Posting | POST | `/api/v1/jobs/:id/postings/:channel/retry` | `{retry_result}` | - |
+| Pause/Resume Posting | PUT | `/api/v1/jobs/:id/postings/:channel/status` | `{action: 'pause'|'resume'}` | Immediate |
+
+**Posting Status Model:**
+```typescript
+interface PostingStatus {
+  channel_id: string;
+  channel_name: string;
+  status: 'pending' | 'posted' | 'failed' | 'expired' | 'paused';
+  posted_at?: DateTime;
+  external_id?: string;
+  external_url?: string;
+  metrics: {
+    views: number;
+    applications: number;
+    clicks: number;
+  };
+  error_details?: {
+    code: string;
+    message: string;
+    retry_count: number;
+    next_retry?: DateTime;
+  };
+}
+```
+
+---
+
+## 📊 Enhanced Analytics APIs
+
+### Posting Performance Analytics
+
+| Metric | Method | Endpoint | Parameters | Response | Aggregation |
+|--------|--------|----------|------------|----------|-------------|
+| Channel Performance | GET | `/api/v2/analytics/channels` | `?period=30d&job_id={}` | `{channel_metrics[]}` | Daily rollup |
+| Posting Funnel | GET | `/api/v2/analytics/posting-funnel` | `?job_id={}&channel={}` | `{funnel_stages[]}` | Real-time |
+| Source Attribution | GET | `/api/v2/analytics/sources` | `?period=30d` | `{source_breakdown}` | Hourly |
+| Share Performance | GET | `/api/v2/analytics/sharing` | `?job_id={}` | `{share_metrics}` | Real-time |
+
+### Application Analytics
+
+| Widget | Method | Endpoint | Response | Dashboard Use |
+|--------|--------|----------|----------|---------------|
+| Application Funnel | GET | `/api/v2/analytics/application-funnel` | `{stages: {views, starts, completes, verifies}}` | Conversion chart |
+| Geographic Distribution | GET | `/api/v2/analytics/geography` | `{locations[], heat_map_data}` | Map visualization |
+| Time-based Metrics | GET | `/api/v2/analytics/time-series` | `{time_series[], trend_analysis}` | Line charts |
+| Device & Browser Stats | GET | `/api/v2/analytics/devices` | `{device_breakdown}` | Tech insights |
+
+### Real-time Analytics
+
+| Event Type | Trigger | Endpoint | Data | Processing |
+|------------|---------|----------|------|------------|
+| Job View | Page visit | `/api/v2/analytics/track` | `{event: 'job_view', job_id, visitor_id}` | Immediate |
+| Application Start | Modal open | `/api/v2/analytics/track` | `{event: 'app_start', job_id}` | Immediate |
+| Share Event | Link generate | `/api/v2/analytics/track` | `{event: 'job_shared', channel, job_id}` | Immediate |
+| External Click | Redirect | `/api/v2/analytics/track` | `{event: 'external_click', channel}` | Immediate |
+
+---
+
+## 🔧 Backend Integration Patterns
+
+### External Job Board Adapters
+
+| Board | Method | Endpoint | Purpose | Response Format |
+|-------|--------|----------|---------|-----------------|
+| True North | POST | `/api/v1/integrations/true-north/post` | Post job | `{external_id, url, expires_at}` |
+| LinkedIn | POST | `/api/v1/integrations/linkedin/post` | Post job | `{post_id, insights_url}` |
+| Generic Adapter | POST | `/api/v1/integrations/:board_id/post` | Extensible pattern | `{board_specific_response}` |
+
+### Webhook Endpoints
+
+| Source | Method | Endpoint | Purpose | Security |
+|--------|--------|----------|---------|----------|
+| True North | POST | `/api/v1/webhooks/true-north/applications` | Receive applications | HMAC signature |
+| Email Service | POST | `/api/v1/webhooks/email/events` | Email events | API key |
+| Analytics | POST | `/api/v1/webhooks/analytics/batch` | Batch events | Token auth |
+
+---
+
+## 📱 Mobile API Considerations
+
+### Mobile-Specific Endpoints
+
+| Purpose | Method | Endpoint | Mobile Optimization |
+|---------|--------|----------|-------------------|
+| Lightweight Job List | GET | `/public/jobs/mobile` | Minimal payload, essential fields only |
+| Quick Apply | POST | `/public/jobs/:id/quick-apply` | Streamlined validation |
+| Upload Progress | GET | `/public/upload/:upload_id/progress` | Real-time progress |
+| Push Notifications | POST | `/api/v1/notifications/register` | Device token registration |
+
+### Response Optimization
+
+```typescript
+// Desktop Response (Full)
+interface JobDetail {
+  id: string;
+  title: string;
+  company: CompanyDetails;
+  description: string;
+  requirements: string[];
+  benefits: string[];
+  salary: SalaryDetails;
+  location: LocationDetails;
+  similar_jobs: Job[];
+  application_stats: ApplicationStats;
+}
+
+// Mobile Response (Lightweight)
+interface JobDetailMobile {
+  id: string;
+  title: string;
+  company: { name: string; logo?: string };
+  description: string; // Truncated
+  key_requirements: string[]; // Top 3
+  salary_range: string;
+  location: string;
+  apply_url: string;
+}
+```
 
 ---
 
