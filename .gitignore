@@ -1,2 +1,5 @@
 # carsa-api
 carsa-api/
+
+# Environment variables
+.env
